@@ -1,18 +1,25 @@
-using System.Text;
 using LittleLemon_API.Data;
-using LittleLemon_API.Helpers;
 using LittleLemon_API.Middleware;
-using LittleLemon_API.Repository.UserRepository;
-using LittleLemon_API.Services.UserServices;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<IJwtHelper, JwtHelper>();
-builder.Services.AddScoped<IUserRepository,UserRepository>();
-builder.Services.AddScoped<IUserService,UserService>();
-builder.Services.AddScoped<ErrorHandlingMiddleware>();
-builder.Services.AddScoped<SwaggerBasicAuthMiddleware>();
+builder.Services.AddSingleton<ErrorHandlingMiddleware>();
+builder.Services.AddSingleton<SwaggerBasicAuthMiddleware>();
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders()
+    .AddApiEndpoints();
+
+builder.Services.AddAuthentication().AddBearerToken(IdentityConstants.BearerScheme);
+
+
+builder.Services.AddAuthorization()
+.AddAuthorizationBuilder();
 
 var connectionString = 
     builder.Configuration.GetConnectionString("DefaultConnection");
@@ -20,35 +27,27 @@ var connectionString =
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
     options.UseSqlServer(connectionString));
 
-// JwtBearer
 builder.Services.AddControllers();
-
-// builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//     .AddJwtBearer(options =>
-//     {
-//         options.TokenValidationParameters = new TokenValidationParameters
-//         {
-//             ValidateIssuerSigningKey = true,
-//             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-//             ValidateIssuer = true,
-//             ValidIssuer = builder.Configuration["Jwt:Issuer"],
-//             ValidateAudience = true,
-//             ValidAudience = builder.Configuration["Jwt:Audience"],
-//             ValidateLifetime = true,
-//             ClockSkew = TimeSpan.Zero
-//         };
-//     });
-
-
-
-builder.Services.AddAuthorization();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey, 
+        Scheme = "Bearer",
+        Name = "Authorization"
+        
+    });
+
+    options.OperationFilter<SecurityRequirementsOperationFilter>();
+});
 
 var app = builder.Build();
 
+app.MapControllers();
 app.UseErrorHandling();
 app.SwaggerBasicAuthMiddleware();
 
@@ -56,14 +55,13 @@ app.SwaggerBasicAuthMiddleware();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
-    
+    app.UseSwaggerUI();   
 }
 
+app.MapIdentityApi<IdentityUser>();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseHttpsRedirection();
-
 
 app.Run();
