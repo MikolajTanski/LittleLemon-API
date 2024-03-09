@@ -3,10 +3,10 @@ using Microsoft.Data.SqlClient;
 
 namespace LittleLemon_API.Middleware;
 
-public class ErrorHandling : IMiddleware
+public class ErrorHandlingMiddleware : IMiddleware
 {
     
-    public ErrorHandling()
+    public ErrorHandlingMiddleware()
     {
     }
 

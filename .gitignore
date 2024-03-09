@@ -3,3 +3,47 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+
+# Pliki binarne i folder obiektów
+**/bin/
+**/obj/
+
+# Pliki i foldery konfiguracyjne środowiska
+**/.vs/
+**/.vscode/
+*.user
+*.suo
+*.userprefs
+*.sln.docstates
+
+# Pliki i foldery pakietów NuGet
+*.nupkg
+# Folder packages jest potrzebny tylko, gdy używasz packages.config
+# **/packages/
+
+# Potencjalnie poufne pliki konfiguracyjne
+**/appsettings*.json
+
+# Folder zależności
+**/node_modules/
+
+# Pliki logów
+*.log
+*.trx
+*.vscode.log
+
+# Pliki tymczasowe
+*.tmp
+*.cache
+*.cer
+*.userosscache
+*.csproj.user
+
+# Inne pliki i foldery środowiska deweloperskiego
+**/Properties/launchSettings.json
+**/AzureFunctions/local.settings.json
+
+# Pliki projektu wygenerowane przez Visual Studio
+*.psess
+*.vsp
+*.vspx
