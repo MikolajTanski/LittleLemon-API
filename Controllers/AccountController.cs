@@ -98,8 +98,8 @@ namespace LittleLemon_API.Controllers;
             return BadRequest(addResult.Errors);
         }
         
-        [Authorize(Roles = "Admin")]
         [HttpPost("createRole")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateRole(string roleName)
         {
             if (string.IsNullOrWhiteSpace(roleName))
@@ -159,8 +159,9 @@ namespace LittleLemon_API.Controllers;
             return BadRequest(result.Errors);
         }
         
-        [Authorize(Roles = "Admin")]
+
         [HttpGet("currentRole")]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> GetCurrentRole(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
