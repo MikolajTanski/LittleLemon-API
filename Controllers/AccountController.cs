@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LittleLemon_API.Controllers;
@@ -23,6 +24,7 @@ namespace LittleLemon_API.Controllers;
 
 
         [HttpPost("addRole")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddUserToRole(string email, string roleName)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -46,6 +48,7 @@ namespace LittleLemon_API.Controllers;
         }
 
         [HttpPost("removeRole")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RemoveUserFromRole(string email, string roleName)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -64,6 +67,7 @@ namespace LittleLemon_API.Controllers;
         }
 
         [HttpPost("changeRole")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ChangeUserRole(string email, string newRole)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -94,6 +98,7 @@ namespace LittleLemon_API.Controllers;
             return BadRequest(addResult.Errors);
         }
         
+        [Authorize(Roles = "Admin")]
         [HttpPost("createRole")]
         public async Task<IActionResult> CreateRole(string roleName)
         {
@@ -154,6 +159,7 @@ namespace LittleLemon_API.Controllers;
             return BadRequest(result.Errors);
         }
         
+        [Authorize(Roles = "Admin")]
         [HttpGet("currentRole")]
         public async Task<IActionResult> GetCurrentRole(string email)
         {
