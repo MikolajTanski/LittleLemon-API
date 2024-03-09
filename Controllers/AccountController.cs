@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using LittleLemon_API.Services.EmailServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,128 +12,30 @@ namespace LittleLemon_API.Controllers;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly IEmailService _emailService;
 
         public AccountController(
             UserManager<IdentityUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            SignInManager<IdentityUser> signInManager)
+            SignInManager<IdentityUser> signInManager,
+            IEmailService emailService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
-        }
-
-
-        [HttpPost("addRole")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddUserToRole(string email, string roleName)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                return NotFound("User not found.");
-            }
-
-            if (!await _roleManager.RoleExistsAsync(roleName))
-            {
-                return BadRequest("Role does not exist.");
-            }
-
-            var result = await _userManager.AddToRoleAsync(user, roleName);
-            if (result.Succeeded)
-            {
-                return Ok($"User {email} added to role {roleName} successfully.");
-            }
-
-            return BadRequest(result.Errors);
-        }
-
-        [HttpPost("removeRole")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> RemoveUserFromRole(string email, string roleName)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                return NotFound("User not found.");
-            }
-
-            var result = await _userManager.RemoveFromRoleAsync(user, roleName);
-            if (result.Succeeded)
-            {
-                return Ok($"User {email} removed from role {roleName} successfully.");
-            }
-
-            return BadRequest(result.Errors);
-        }
-
-        [HttpPost("changeRole")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> ChangeUserRole(string email, string newRole)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                return NotFound("User not found.");
-            }
-
-            var currentRoles = await _userManager.GetRolesAsync(user);
-            var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
-
-            if (!removeResult.Succeeded)
-            {
-                return BadRequest("Failed to remove user roles.");
-            }
-
-            if (!await _roleManager.RoleExistsAsync(newRole))
-            {
-                await _roleManager.CreateAsync(new IdentityRole(newRole));
-            }
-
-            var addResult = await _userManager.AddToRoleAsync(user, newRole);
-            if (addResult.Succeeded)
-            {
-                return Ok($"User {email} role changed to {newRole} successfully.");
-            }
-
-            return BadRequest(addResult.Errors);
+            _emailService = emailService;
         }
         
-        [HttpPost("createRole")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateRole(string roleName)
-        {
-            if (string.IsNullOrWhiteSpace(roleName))
-            {
-                return BadRequest("Role name should not be empty.");
-            }
-
-            var roleExist = await _roleManager.RoleExistsAsync(roleName);
-            if (roleExist)
-            {
-                return BadRequest("Role already exists.");
-            }
-
-            var result = await _roleManager.CreateAsync(new IdentityRole(roleName));
-            if (result.Succeeded)
-            {
-                return Ok($"Role {roleName} created successfully.");
-            }
-
-            return BadRequest(result.Errors);
-        }
-        
+        //TODO register by sending a email
         [HttpPost("registerUser")]
         public async Task<IActionResult> RegisterUser(string email, string password, string username)
         {
-            // Sprawdzenie, czy nazwa użytkownika już istnieje
             var userNameExists = await _userManager.FindByNameAsync(username);
             if (userNameExists != null)
             {
                 return BadRequest("Username already exists.");
             }
 
-            // Sprawdzenie, czy e-mail użytkownika już istnieje
             var userEmailExists = await _userManager.FindByEmailAsync(email);
             if (userEmailExists != null)
             {
@@ -159,10 +62,8 @@ namespace LittleLemon_API.Controllers;
             return BadRequest(result.Errors);
         }
         
-
-        [HttpGet("currentRole")]
-        [Authorize(Roles = "User,Admin")]
-        public async Task<IActionResult> GetCurrentRole(string email)
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(string email, string password)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
@@ -170,14 +71,48 @@ namespace LittleLemon_API.Controllers;
                 return NotFound("User not found.");
             }
 
-            var roles = await _userManager.GetRolesAsync(user);
-            if (roles.Count > 0)
+            var result = await _signInManager.PasswordSignInAsync(user.UserName, password, isPersistent: false, lockoutOnFailure: false);
+            if (result.Succeeded)
             {
-                return Ok(new { roles = roles });
+                return Ok("User logged in successfully.");
             }
-            else
+
+            return BadRequest("Invalid login attempt.");
+        }
+        
+        [HttpPost("resetPassword")]
+        [Authorize(Roles = "Admin,User")]
+        public async Task<IActionResult> ResetPassword(string email, string code, string newPassword)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
             {
-                return Ok("User has no roles assigned.");
+                return BadRequest("Invalid request");
             }
+
+            var result = await _userManager.ResetPasswordAsync(user, code, newPassword);
+            if (result.Succeeded)
+            {
+                return Ok("Password has been reset successfully.");
+            }
+
+            return BadRequest("Failed to reset password.");
+        }
+        
+        [HttpPost("forgotPassword")]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+            {
+                return Ok("If your email is valid, we have sent a password reset link.");
+            }
+
+            var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
+
+             await _emailService.SendEmailAsync(email, "Reset Password", $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
+
+            return Ok("If your email is valid, we have sent a password reset link.");
         }
     }

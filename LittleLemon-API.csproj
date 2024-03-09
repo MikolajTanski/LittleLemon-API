@@ -44,7 +44,6 @@
       <Folder Include="Dtos" />
       <Folder Include="Helpers" />
       <Folder Include="Repository" />
-      <Folder Include="Services" />
     </ItemGroup>
 
 </Project>

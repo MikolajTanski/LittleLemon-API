@@ -1,5 +1,6 @@
 using LittleLemon_API.Data;
 using LittleLemon_API.Middleware;
+using LittleLemon_API.Services.EmailServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -9,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<ErrorHandlingMiddleware>();
 builder.Services.AddSingleton<SwaggerBasicAuthMiddleware>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -33,7 +35,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+    options.AddSecurityDefinition("IdentityEndpoints", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey, 
@@ -58,7 +60,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();   
 }
 
-app.MapIdentityApi<IdentityUser>();
 app.UseAuthentication();
 app.UseAuthorization();
 

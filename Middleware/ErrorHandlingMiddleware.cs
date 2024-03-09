@@ -5,7 +5,6 @@ namespace LittleLemon_API.Middleware;
 
 public class ErrorHandlingMiddleware : IMiddleware
 {
-    
     public ErrorHandlingMiddleware()
     {
     }
@@ -45,29 +44,29 @@ public class ErrorHandlingMiddleware : IMiddleware
         {
             switch (sqlException.Number)
             {
-                case 547: // Ograniczenie klucza obcego
+                case 547: // Foreign key constraint
                     context.Response.StatusCode = 400;
-                    await context.Response.WriteAsJsonAsync("Operacja naruszyła ograniczenia integralności bazy danych.");
+                    await context.Response.WriteAsJsonAsync("Operation violated database integrity constraints.");
                     break;
-                case 2601: // Naruszenie unikalności
+                case 2601: // Unique index violation
                 case 2627:
                     context.Response.StatusCode = 400;
-                    await context.Response.WriteAsJsonAsync("Jedna z wartości narusza unikalność danych.");
+                    await context.Response.WriteAsJsonAsync("One of the values violates data uniqueness.");
                     break;
-                case -2: // Przekroczenie czasu oczekiwania
+                case -2: // Timeout
                     context.Response.StatusCode = 408;
-                    await context.Response.WriteAsJsonAsync("Przekroczenie czasu oczekiwania na odpowiedź z bazy danych.");
+                    await context.Response.WriteAsJsonAsync("Database response timeout exceeded.");
                     break;
                 default: 
                     context.Response.StatusCode = 500;
-                    await context.Response.WriteAsJsonAsync("Wystąpił błąd wewnętrzny bazy danych.");
+                    await context.Response.WriteAsJsonAsync("An internal database error occurred.");
                     break;
             }
         }
         catch (SystemException)
         {
             context.Response.StatusCode = 500;
-            await context.Response.WriteAsJsonAsync("Wystąpił nieoczekiwany błąd systemowy.");
+            await context.Response.WriteAsJsonAsync("An unexpected system error occurred.");
         }
     }
 }
