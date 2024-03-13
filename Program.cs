@@ -23,13 +23,24 @@ builder.Services.AddAuthentication().AddBearerToken(IdentityConstants.BearerSche
 builder.Services.AddAuthorization()
 .AddAuthorizationBuilder();
 
-var connectionString = 
+var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => 
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddControllers();
+
+// CORS configuration
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod();
+    });
+});
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -38,10 +49,10 @@ builder.Services.AddSwaggerGen(options =>
     options.AddSecurityDefinition("IdentityEndpoints", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey, 
+        Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer",
         Name = "Authorization"
-        
+
     });
 
     options.OperationFilter<SecurityRequirementsOperationFilter>();
@@ -53,11 +64,13 @@ app.MapControllers();
 app.UseErrorHandling();
 app.SwaggerBasicAuthMiddleware();
 
+app.UseCors();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();   
+    app.UseSwaggerUI();
 }
 
 app.UseAuthentication();
