@@ -1,5 +1,5 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LittleLemon_API.Models
 {
@@ -14,7 +14,8 @@ namespace LittleLemon_API.Models
 
         public string Type { get; set; }
 
-        public float Price { get; set; }
-        
+        [Column(TypeName = "decimal(18, 2)")] 
+        public decimal Price { get; set; }
+
     }
 }
