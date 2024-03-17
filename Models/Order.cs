@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LittleLemon_API.Models
 {
@@ -8,9 +9,10 @@ namespace LittleLemon_API.Models
         [Key]
         public int Id { get; set; }
 
-        [Required]
-        public virtual ICollection<Meal> Meals { get; set; }
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal Total { get; set; }
 
-        public float Total { get; set; }
+        // Collection of Meals within the Order
+        public virtual ICollection<Meal> Meals { get; set; } = new List<Meal>();
     }
 }
