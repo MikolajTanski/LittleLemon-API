@@ -47,3 +47,4 @@ riderModule.iml
 *.psess
 *.vsp
 *.vspx
+/appsettings.json
