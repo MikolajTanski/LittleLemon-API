@@ -1,0 +1,13 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/bin/Release/net8.0/fr
+/.idea/.idea.LittleLemon-API/.idea
+/.idea/.idea.LittleLemon-API-Azure.dir/.idea
+/.vs/LittleLemon-API/DesignTimeBuild
+/.vs/LittleLemon-API/FileContentIndex
+/.vs/LittleLemon-API/v17
+/.vs
+/bin
+/obj
