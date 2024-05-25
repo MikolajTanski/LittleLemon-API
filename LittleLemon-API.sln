@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LittleLemon-API", "LittleLemon-API.csproj", "{1A459016-61EA-485D-8AD1-68D922654BFE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1A459016-61EA-485D-8AD1-68D922654BFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A459016-61EA-485D-8AD1-68D922654BFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A459016-61EA-485D-8AD1-68D922654BFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A459016-61EA-485D-8AD1-68D922654BFE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
