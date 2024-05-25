@@ -4,6 +4,7 @@ using LittleLemon_API.Middleware;
 using LittleLemon_API.Repository.MealRepository;
 using LittleLemon_API.Repository.OrderRepository;
 using LittleLemon_API.Services.EmailServices;
+using LittleLemon_API.Services.ImageService;
 using LittleLemon_API.Services.MealService;
 using LittleLemon_API.Services.OrderService;
 using Microsoft.AspNetCore.Identity;
@@ -26,6 +27,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IMealService, MealService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+builder.Services.AddScoped<IImageService, ImageService>();
 // Ensure that the KeyVaultName setting is properly retrieved from the configuration
 var keyVaultName = builder.Configuration["KeyVaultName"];
 if (string.IsNullOrEmpty(keyVaultName))
