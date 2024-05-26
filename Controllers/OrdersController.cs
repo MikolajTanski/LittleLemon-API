@@ -1,4 +1,5 @@
-﻿using LittleLemon_API.Models;
+﻿using System.Reflection;
+using LittleLemon_API.Models;
 using LittleLemon_API.Services.OrderService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,12 +17,24 @@ public class OrdersController : ControllerBase
         _orderService = orderService;
     }
 
+    //refleksja -  bez wiekszego sensu ale jest mtan
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
+    public async Task<ActionResult<IEnumerable<Order>>> GetOrdersWithReflection()
     {
-        var orders = await _orderService.GetOrdersAsync();
-        return Ok(orders);
+        // Typ
+        Type serviceType = _orderService.GetType();
+        // Metoda do pobrania zamówień xd
+        MethodInfo methodInfo = serviceType.GetMethod("GetOrdersAsync");
+        if (methodInfo != null)
+        {
+            // Dynamiczne wywołanie metody xdd
+            var orders = await (Task<IEnumerable<Order>>)methodInfo.Invoke(_orderService, null);
+            return Ok(orders);
+        }
+
+        return NotFound();
     }
+
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Order>> GetOrder(int id)

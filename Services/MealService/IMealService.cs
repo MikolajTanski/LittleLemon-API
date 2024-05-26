@@ -9,4 +9,5 @@ public interface IMealService
     Task CreateMealAsync(Meal meal);
     Task UpdateMealAsync(Meal meal);
     Task DeleteMealAsync(int id);
+    Task<(string MostPopularName, int Count)> GetMostPopularMealAsync();
 }

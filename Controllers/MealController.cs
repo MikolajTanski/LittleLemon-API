@@ -74,4 +74,18 @@ public class MealsController : ControllerBase
 
         return NoContent();
     }
+    
+    [HttpGet("most-popular")]
+    public async Task<IActionResult> GetAllMealsWithMostPopular()
+    {
+        try
+        {
+            var (meals, mostPopular) = await _mealService.GetMostPopularMealAsync();
+            return Ok(new { Meals = meals, Count = mostPopular });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
 }

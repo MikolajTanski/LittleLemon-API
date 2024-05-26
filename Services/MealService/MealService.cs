@@ -1,4 +1,5 @@
-﻿using LittleLemon_API.Models;
+﻿using LittleLemon_API.Extensions;
+using LittleLemon_API.Models;
 using LittleLemon_API.Repository.MealRepository;
 
 namespace LittleLemon_API.Services.MealService;
@@ -41,5 +42,19 @@ public class MealService : IMealService
         }
 
         await _mealRepository.DeleteMealAsync(id);
+    }
+    
+    public async Task<(string MostPopularName, int Count)> GetMostPopularMealAsync()
+    {
+        var meals = await _mealRepository.GetAllMealsAsync();
+        if (meals == null || !meals.Any())
+        {
+            throw new InvalidOperationException("No meals available.");
+        }
+
+        // Używamy metody rozszerzającej, aby znaleźć najpopularniejszy posiłek
+        var mostPopular = meals.MostPopularMeal();
+        
+        return mostPopular;
     }
 }
