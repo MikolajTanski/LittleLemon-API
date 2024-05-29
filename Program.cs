@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 
@@ -45,6 +46,12 @@ var connectionString = builder.Configuration["DefaultConnection"];
 if (string.IsNullOrEmpty(connectionString))
 {
     throw new InvalidOperationException("DefaultConnection is not configured properly in Azure Key Vault.");
+}
+//blob
+var connectionStringBlob = builder.Configuration["LittleLemonImages"];
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Blob storage connection string is not configured.");
 }
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -82,6 +89,15 @@ builder.Services.AddSwaggerGen(options =>
     }});
 });
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder => builder.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod());
+});
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -114,7 +130,6 @@ using (var scope = app.Services.CreateScope())
 app.MapControllers();
 app.UseErrorHandling();
 
-app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -14,10 +14,10 @@ namespace LittleLemon_API.Services.ImageService
 
         public async Task<List<object>> GetAllImagesAsync()
         {
-            var connectionString = _configuration.GetConnectionString("AzureStorageConnection");
+            var connectionStringBlob = _configuration["LittleLemonImages"];
             var containerName = "hero";
 
-            var blobServiceClient = new BlobServiceClient(connectionString);
+            var blobServiceClient = new BlobServiceClient(connectionStringBlob);
             var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
 
             List<object> images = new List<object>();
